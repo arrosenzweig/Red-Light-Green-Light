@@ -5,6 +5,8 @@ A phone-first mixer bingo game for Yale grad students.
 - **New players** fill out a short questionnaire (name, phone, program, relationship status, who they want to meet).
 - **Returning players** type their phone number to get their card and marks back.
 - Each player gets a 5x5 card with a **RedLight GreenLight** free space in the middle.
+- To check off a square, the player enters the **name** of the person they did it with, plus **either a phone number or a social handle**.
+- A **My list** tab on the corner of the card holds everyone they collected.
 - Squares are generated from the questionnaire — status, program, and who they're here to meet.
 
 ## Files
@@ -14,7 +16,7 @@ A phone-first mixer bingo game for Yale grad students.
 | `index.html` | All four screens: welcome, returning, questionnaire, board |
 | `styles.css` | Phone-first styling; the light colors live in `:root` |
 | `data.js` | **Edit this to change the squares** — programs, statuses, and the prompt pools |
-| `app.js` | Flow, validation, storage, card generation, bingo detection |
+| `app.js` | Flow, validation, storage, card generation, partner capture, directory, bingo detection |
 
 ## Editing the squares
 

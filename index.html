@@ -126,7 +126,14 @@
     </header>
 
     <div class="board-wrap">
-      <div class="bingo" id="bingo"></div>
+      <div class="board-stage">
+        <button class="dir-tab" id="btn-directory">
+          <span class="dir-icon">👥</span>
+          <span class="dir-label">My list</span>
+          <span class="dir-count" id="dir-count">0</span>
+        </button>
+        <div class="bingo" id="bingo"></div>
+      </div>
     </div>
 
     <footer class="board-foot">
@@ -139,6 +146,58 @@
         <button class="btn btn-ghost" id="btn-reset">Reset my marks</button>
         <button class="btn btn-ghost" id="btn-logout">Switch player</button>
         <button class="btn btn-link" id="btn-close-sheet">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ---- capture: who did you do this with? ---- -->
+    <div class="sheet" id="capture" hidden>
+      <div class="sheet-inner">
+        <p class="cap-task" id="cap-task"></p>
+        <h3 class="cap-title">Who did you do this with?</h3>
+
+        <label class="field">
+          <span class="label">Their name</span>
+          <input id="cap-name" type="text" autocomplete="off" placeholder="Jordan M." maxlength="40" />
+        </label>
+
+        <p class="or-line"><span>and one of these</span></p>
+
+        <label class="field">
+          <span class="label">Their number</span>
+          <input id="cap-phone" type="tel" inputmode="numeric" placeholder="(203) 555-0123" maxlength="18" />
+        </label>
+
+        <label class="field">
+          <span class="label">Or their social handle</span>
+          <input id="cap-social" type="text" autocomplete="off" placeholder="@jordan.m" maxlength="40" />
+        </label>
+
+        <p class="error" id="cap-error"></p>
+
+        <button class="btn btn-green" id="cap-save">Check it off</button>
+        <button class="btn btn-link" id="cap-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ---- already-marked square ---- -->
+    <div class="sheet" id="undo" hidden>
+      <div class="sheet-inner">
+        <p class="cap-task" id="undo-task"></p>
+        <h3 class="cap-title" id="undo-who">Done with someone</h3>
+        <p class="sub" id="undo-contact"></p>
+        <button class="btn btn-ghost" id="undo-clear">Un-check this square</button>
+        <button class="btn btn-link" id="undo-cancel">Close</button>
+      </div>
+    </div>
+
+    <!-- ---- directory ---- -->
+    <div class="sheet sheet-tall" id="directory" hidden>
+      <div class="sheet-inner">
+        <div class="dir-head">
+          <h3 class="cap-title">People I met</h3>
+          <button class="icon-btn" id="dir-close" aria-label="Close">✕</button>
+        </div>
+        <div class="dir-list" id="dir-list"></div>
       </div>
     </div>
   </section>

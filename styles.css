@@ -171,3 +171,47 @@ input::placeholder{color:#5c5c70;}
   animation:up .22s ease;
 }
 @keyframes up{from{transform:translateY(100%)}to{transform:none}}
+
+/* ---------- board stage + directory tab ---------- */
+.board-stage{position:relative;width:100%;max-width:min(100vw - 24px,520px);}
+.board-stage .bingo{max-width:none;}
+
+.dir-tab{
+  position:absolute;top:-16px;right:0;transform:translateY(-100%);
+  display:flex;align-items:center;gap:7px;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:650;
+  padding:9px 13px;cursor:pointer;z-index:4;
+}
+.dir-tab:active{transform:translateY(-100%) scale(.96);}
+.dir-icon{font-size:14px;line-height:1;}
+.dir-count{
+  background:var(--accent);color:#06220f;border-radius:999px;
+  min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;
+  font-size:12px;font-weight:800;
+}
+
+/* ---------- capture sheet ---------- */
+.sheet-inner{max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.cap-task{
+  margin:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;
+}
+.cap-title{margin:0 0 4px;font-size:21px;font-weight:750;}
+.or-line{
+  display:flex;align-items:center;gap:10px;margin:2px 0;
+  color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;
+}
+.or-line::before,.or-line::after{content:"";flex:1;height:1px;background:var(--line);}
+
+/* ---------- directory ---------- */
+.sheet-tall .sheet-inner{min-height:60vh;}
+.dir-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;}
+.dir-list{display:flex;flex-direction:column;gap:8px;}
+.dir-empty{color:var(--muted);font-size:15px;margin:12px 0;}
+.dir-row{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+}
+.dir-name{margin:0;font-size:16px;font-weight:700;}
+.dir-contact{margin:3px 0 0;font-size:14px;color:var(--accent);text-decoration:none;display:block;}
+.dir-task{margin:5px 0 0;font-size:12.5px;color:var(--muted);line-height:1.3;}

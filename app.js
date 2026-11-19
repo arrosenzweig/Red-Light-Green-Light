@@ -186,7 +186,8 @@ $('#btn-next').addEventListener('click', () => {
     seeking: draft.seeking,
     createdAt: existing ? existing.createdAt : Date.now(),
     card: null,
-    marks: []
+    marks: [],
+    contacts: {}
   };
   player.card  = buildCard(player);
   player.marks = existing && existing.card ? [] : [];
@@ -274,6 +275,7 @@ let current = null;
 
 function openBoard(player) {
   current = player;
+  if (!player.contacts) player.contacts = {};
 
   const statusDef  = STATUSES.find(s => s.id === player.status);
   const programDef = PROGRAMS.find(p => p.id === player.program);
@@ -306,7 +308,7 @@ function openBoard(player) {
     } else {
       cell.textContent = text;
       cell.setAttribute('aria-pressed', player.marks.includes(i) ? 'true' : 'false');
-      cell.addEventListener('click', () => toggle(i, cell));
+      cell.addEventListener('click', () => onSquareTap(i, cell));
     }
     grid.appendChild(cell);
   });
@@ -315,15 +317,150 @@ function openBoard(player) {
   show('screen-board');
 }
 
-function toggle(i, cell) {
-  const on = cell.getAttribute('aria-pressed') === 'true';
-  cell.setAttribute('aria-pressed', on ? 'false' : 'true');
-  if (on) current.marks = current.marks.filter(x => x !== i);
-  else current.marks.push(i);
-  haptic(on ? 5 : 12);
+let pendingSquare = null;
+
+function cellAt(i) { return $('.sq[data-i="' + i + '"]'); }
+
+function onSquareTap(i, cell) {
+  haptic();
+  if (cell.getAttribute('aria-pressed') === 'true') openUndo(i);
+  else openCapture(i);
+}
+
+/* ---- capture: name + number or social ---- */
+function openCapture(i) {
+  pendingSquare = i;
+  $('#cap-task').textContent = current.card[i];
+  $('#cap-name').value = '';
+  $('#cap-phone').value = '';
+  $('#cap-social').value = '';
+  $('#cap-error').textContent = '';
+  $('#capture').hidden = false;
+  setTimeout(() => $('#cap-name').focus(), 60);
+}
+
+function closeCapture() { $('#capture').hidden = true; pendingSquare = null; }
+
+$('#cap-phone').addEventListener('input', e => { e.target.value = formatPhone(e.target.value); });
+$('#cap-cancel').addEventListener('click', closeCapture);
+$('#capture').addEventListener('click', e => { if (e.target.id === 'capture') closeCapture(); });
+
+$('#cap-save').addEventListener('click', () => {
+  const name   = $('#cap-name').value.trim();
+  const phone  = $('#cap-phone').value.trim();
+  const social = $('#cap-social').value.trim();
+
+  if (name.length < 2) {
+    $('#cap-error').textContent = 'Add their name first.'; haptic(30); return;
+  }
+  if (!phone && !social) {
+    $('#cap-error').textContent = 'Add a number or a social handle.'; haptic(30); return;
+  }
+  if (phone && !validPhone(phone)) {
+    $('#cap-error').textContent = 'That number needs 10 digits — or leave it blank and use a handle.';
+    haptic(30); return;
+  }
+
+  const i = pendingSquare;
+  current.contacts[i] = {
+    name: name,
+    phone: phone ? normalizePhone(phone) : '',
+    social: social,
+    task: current.card[i],
+    at: Date.now()
+  };
+  if (!current.marks.includes(i)) current.marks.push(i);
+
+  const cell = cellAt(i);
+  if (cell) cell.setAttribute('aria-pressed', 'true');
   Store.save(current);
   updateFooter();
+  closeCapture();
+  haptic(14);
+});
+
+/* ---- tapping a square that's already checked off ---- */
+function openUndo(i) {
+  pendingSquare = i;
+  const c = current.contacts[i];
+  $('#undo-task').textContent = current.card[i];
+  $('#undo-who').textContent = c ? c.name : 'Already checked off';
+  $('#undo-contact').textContent = c ? contactLine(c) : '';
+  $('#undo').hidden = false;
 }
+
+function closeUndo() { $('#undo').hidden = true; pendingSquare = null; }
+$('#undo-cancel').addEventListener('click', closeUndo);
+$('#undo').addEventListener('click', e => { if (e.target.id === 'undo') closeUndo(); });
+$('#undo-clear').addEventListener('click', () => {
+  const i = pendingSquare;
+  current.marks = current.marks.filter(x => x !== i);
+  delete current.contacts[i];
+  const cell = cellAt(i);
+  if (cell) cell.setAttribute('aria-pressed', 'false');
+  Store.save(current);
+  updateFooter();
+  closeUndo();
+});
+
+/* ---- the directory ---- */
+function contactLine(c) {
+  if (c.phone && c.social) return formatPhone(c.phone) + ' · ' + c.social;
+  if (c.phone) return formatPhone(c.phone);
+  return c.social;
+}
+
+function openDirectory() {
+  const list = $('#dir-list');
+  list.innerHTML = '';
+  const entries = Object.keys(current.contacts)
+    .map(k => current.contacts[k])
+    .sort((a, b) => a.at - b.at);
+
+  if (!entries.length) {
+    const p = document.createElement('p');
+    p.className = 'dir-empty';
+    p.textContent = 'Nobody yet. Tap a square to check it off and the person goes here.';
+    list.appendChild(p);
+  }
+
+  entries.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'dir-row';
+
+    const name = document.createElement('p');
+    name.className = 'dir-name';
+    name.textContent = c.name;
+    row.appendChild(name);
+
+    if (c.phone) {
+      const a = document.createElement('a');
+      a.className = 'dir-contact';
+      a.href = 'tel:' + c.phone;
+      a.textContent = formatPhone(c.phone);
+      row.appendChild(a);
+    }
+    if (c.social) {
+      const s = document.createElement('span');
+      s.className = 'dir-contact';
+      s.textContent = c.social;
+      row.appendChild(s);
+    }
+
+    const task = document.createElement('p');
+    task.className = 'dir-task';
+    task.textContent = c.task;
+    row.appendChild(task);
+
+    list.appendChild(row);
+  });
+
+  $('#directory').hidden = false;
+}
+
+$('#btn-directory').addEventListener('click', openDirectory);
+$('#dir-close').addEventListener('click', () => { $('#directory').hidden = true; });
+$('#directory').addEventListener('click', e => { if (e.target.id === 'directory') $('#directory').hidden = true; });
 
 function marked(i) { return i === 12 || current.marks.includes(i); }
 
@@ -338,6 +475,7 @@ function countBingos() {
 
 function updateFooter() {
   $('#marked-count').textContent = current.marks.length;
+  $('#dir-count').textContent = Object.keys(current.contacts || {}).length;
   const n = countBingos();
   $('#bingo-flag').textContent =
     current.marks.length === 24 ? 'BLACKOUT 🏆' :
@@ -352,6 +490,7 @@ $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('#sh
 
 $('#btn-reset').addEventListener('click', () => {
   current.marks = [];
+  current.contacts = {};
   Store.save(current);
   $('#sheet').hidden = true;
   openBoard(current);
