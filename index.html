@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#0d0d12" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Red Light, Green Light</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ SCREEN: WELCOME ============ -->
+  <section class="screen active" id="screen-welcome">
+    <div class="stack center">
+      <div class="logo">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      </div>
+      <h1 class="title">Red Light<br/>Green Light</h1>
+      <p class="tagline">Yale Grad Mixer Bingo</p>
+
+      <div class="actions">
+        <button class="btn btn-green" data-go="screen-new">I'm new here</button>
+        <button class="btn btn-ghost" data-go="screen-return">I'm coming back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: RETURNING ============ -->
+  <section class="screen" id="screen-return">
+    <div class="stack">
+      <button class="back" data-go="screen-welcome">← Back</button>
+      <h2 class="h2">Welcome back</h2>
+      <p class="sub">Enter the phone number you signed up with.</p>
+
+      <label class="field">
+        <span class="label">Phone number</span>
+        <input id="return-phone" type="tel" inputmode="numeric" autocomplete="tel"
+               placeholder="(203) 555-0123" maxlength="18" />
+      </label>
+
+      <p class="error" id="return-error"></p>
+
+      <button class="btn btn-green" id="btn-recover">Find my card</button>
+      <button class="btn btn-link" data-go="screen-new">Actually, I'm new →</button>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: QUESTIONNAIRE ============ -->
+  <section class="screen" id="screen-new">
+    <div class="stack">
+      <button class="back" data-go="screen-welcome">← Back</button>
+
+      <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+
+      <form id="quiz" novalidate>
+
+        <!-- Q1 -->
+        <div class="step active" data-step="0">
+          <h2 class="h2">First things first</h2>
+          <p class="sub">So we know whose card is whose.</p>
+
+          <label class="field">
+            <span class="label">Your name</span>
+            <input id="q-name" type="text" autocomplete="name" placeholder="Alex R." maxlength="40" />
+          </label>
+
+          <label class="field">
+            <span class="label">Phone number</span>
+            <input id="q-phone" type="tel" inputmode="numeric" autocomplete="tel"
+                   placeholder="(203) 555-0123" maxlength="18" />
+            <span class="hint">This is how you get your card back later.</span>
+          </label>
+        </div>
+
+        <!-- Q2 -->
+        <div class="step" data-step="1">
+          <h2 class="h2">What's your program?</h2>
+          <p class="sub">Pick the one you'd put on a name tag.</p>
+          <div class="choices" id="q-program"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="step" data-step="2">
+          <h2 class="h2">Relationship status</h2>
+          <p class="sub">No judgment. This changes your squares.</p>
+          <div class="choices" id="q-status"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="step" data-step="3">
+          <h2 class="h2">A couple quick ones</h2>
+          <p class="sub">So your flirty squares point the right direction.</p>
+
+          <div class="subq">
+            <span class="label">I am…</span>
+            <div class="choices tight" id="q-gender"></div>
+          </div>
+
+          <div class="subq">
+            <span class="label">I'm looking to meet…</span>
+            <div class="choices tight" id="q-seeking"></div>
+          </div>
+        </div>
+
+        <p class="error" id="quiz-error"></p>
+
+        <div class="nav">
+          <button type="button" class="btn btn-ghost" id="btn-prev">Back</button>
+          <button type="button" class="btn btn-green" id="btn-next">Next</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: BOARD ============ -->
+  <section class="screen" id="screen-board">
+    <header class="board-head">
+      <div>
+        <p class="hello" id="board-hello">Hi</p>
+        <p class="board-meta" id="board-meta"></p>
+      </div>
+      <button class="icon-btn" id="btn-menu" aria-label="Menu">⋯</button>
+    </header>
+
+    <div class="board-wrap">
+      <div class="bingo" id="bingo"></div>
+    </div>
+
+    <footer class="board-foot">
+      <p class="count"><span id="marked-count">0</span> / 24 marked</p>
+      <p class="bingo-flag" id="bingo-flag"></p>
+    </footer>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-inner">
+        <button class="btn btn-ghost" id="btn-reset">Reset my marks</button>
+        <button class="btn btn-ghost" id="btn-logout">Switch player</button>
+        <button class="btn btn-link" id="btn-close-sheet">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
