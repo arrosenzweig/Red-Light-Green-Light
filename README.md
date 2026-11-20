@@ -22,16 +22,20 @@ A phone-first mixer bingo game for Yale grad students.
 
 Open `data.js`. Prompt pools:
 
-- `POOL_UNIVERSAL` — everyone can get these
-- `POOL_BY_STATUS` — keyed by `single`, `taken`, `complicated`, `flow`
-- `POOL_BY_PROGRAM` — keyed by program id
-- `CROSS_TEMPLATE` — "meet someone from <other program>"
+- `POOL_UNIVERSAL` - the "everyone" squares, any player can draw these
+- `POOL_BY_LIGHT.greenwhite` - for Single / Open and Going with the flow
+- `POOL_BY_LIGHT.red` - for Taken
+- `POOL_BY_LIGHT.yellow` - for It's...complicated
+- `CENTER_GREENWHITE` - the centre square for green/white players
+- `LIGHT_SQUARES_PER_CARD` - how many of a player's own light squares go on a card (the rest come from `POOL_UNIVERSAL`)
 
-In any prompt, `{TARGET}` becomes "a guy" / "a girl" / "someone" based on who the player said
-they want to meet. Flirty squares only go out to **Single / Open** and **Going with the flow**
-players who didn't pick "just here for friends".
+In any prompt, `{GW}` becomes "green/white light" - or "green/white guy" / "green/white girl"
+for green/white players who said who they are looking to meet. Leave `{GW}` in place when editing.
 
-Keep square text short — roughly 5 words reads best on a phone.
+The centre square is always free. Green/white players see the date challenge there and can tap it
+to log who they set the date with; red and yellow players see the plain RedLight GreenLight space.
+
+Square text shrinks automatically to fit its tile, so longer prompts are fine.
 
 ## Storage
 

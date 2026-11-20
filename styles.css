@@ -140,6 +140,7 @@ input::placeholder{color:#5c5c70;}
 }
 .sq:active{transform:scale(.95);}
 .sq[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 24%,var(--card));border-color:var(--accent);}
+.sq.free[aria-pressed="true"]::after{display:none;}
 .sq[aria-pressed="true"]::after{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--accent) 30%,transparent) 0 42%, transparent 44%);
@@ -215,3 +216,7 @@ input::placeholder{color:#5c5c70;}
 .dir-name{margin:0;font-size:16px;font-weight:700;}
 .dir-contact{margin:3px 0 0;font-size:14px;color:var(--accent);text-decoration:none;display:block;}
 .dir-task{margin:5px 0 0;font-size:12.5px;color:var(--muted);line-height:1.3;}
+
+/* centre square when it carries the green/white date challenge */
+.sq.free-task{font-size:clamp(7px,1.95vw,10px);font-weight:700;letter-spacing:0;padding:3px 2px;}
+.sq.free-task .lights i{width:5px;height:5px;}

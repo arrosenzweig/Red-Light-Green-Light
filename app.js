@@ -219,55 +219,58 @@ $('#return-phone').addEventListener('keydown', e => {
 });
 
 /* ------------------- card generation -------------------- */
-function targetWords(seeking) {
-  if (seeking === 'men')   return { one: 'a guy',     many: 'guys' };
-  if (seeking === 'women') return { one: 'a girl',    many: 'girls' };
-  return { one: 'someone', many: 'people' };
+function lightWord(player) {
+  const base = 'green/white light';
+  const statusDef = STATUSES.find(s => s.id === player.status);
+  /* only personalise for the people actually looking */
+  if (!statusDef || statusDef.lightGroup !== 'greenwhite') return base;
+  if (player.seeking === 'men')   return 'green/white guy';
+  if (player.seeking === 'women') return 'green/white girl';
+  return base;
 }
 
 function fill(text, player) {
-  const t = targetWords(player.seeking);
-  const out = text.replace(/\{TARGET\}/g, t.one).replace(/\{TARGETS\}/g, t.many);
+  const out = text.replace(/\{GW\}/g, lightWord(player));
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
 function buildCard(player) {
-  const rnd = rngFrom(seedFrom(player.phone + '|' + player.status + '|' + player.program));
+  const rnd = rngFrom(seedFrom(player.phone + '|' + player.status));
   const statusDef = STATUSES.find(s => s.id === player.status);
+  const group = statusDef.lightGroup;
 
-  /* flirty squares only for single / going-with-the-flow,
-     and only if they're not here purely for friends          */
-  const wantsFlirt = statusDef.flirty && player.seeking !== 'friends';
-
-  const cross = PROGRAMS
-    .filter(p => p.id !== player.program)
-    .map(p => CROSS_TEMPLATE.replace('{PROGRAM}', p.label));
-
-  const statusPool  = (POOL_BY_STATUS[player.status] || []).slice();
-  const programPool = (POOL_BY_PROGRAM[player.program] || []).slice();
+  const lightPool = (POOL_BY_LIGHT[group] || []).slice();
 
   const picked = [];
   const seen = new Set();
   const take = (pool, n) => {
     shuffle(pool, rnd).forEach(line => {
       if (picked.length >= 24 || n <= 0) return;
-      const t = fill(line, player);
-      if (seen.has(t)) return;
-      seen.add(t); picked.push(t); n--;
+      const txt = fill(line, player);
+      if (seen.has(txt)) return;
+      seen.add(txt); picked.push(txt); n--;
     });
   };
 
-  take(statusPool, wantsFlirt ? 8 : 6);
-  take(cross, 5);
-  take(programPool, 2);
-  take(POOL_UNIVERSAL, 24);           // fill the rest
-  take(cross, 24);                    // last-resort top-up
+  take(lightPool, LIGHT_SQUARES_PER_CARD);   // their own light's squares
+  take(POOL_UNIVERSAL, 24);                  // fill up with the everyone pool
+  take(lightPool, 24);                       // top up if the pools ran short
 
-  while (picked.length < 24) picked.push('Free-for-all: meet anyone new');
+  while (picked.length < 24) picked.push('Meet someone new and get their name');
 
   const squares = shuffle(picked.slice(0, 24), rnd);
   squares.splice(12, 0, '__FREE__');
   return squares;
+}
+
+/* The centre square's wording: green/white players get the date
+   challenge, everyone else gets the plain free space.            */
+function centerText(player) {
+  const statusDef = STATUSES.find(s => s.id === player.status);
+  if (statusDef && statusDef.lightGroup === 'greenwhite') {
+    return fill(CENTER_GREENWHITE, player);
+  }
+  return 'RedLight GreenLight';
 }
 
 /* ----------------------- board -------------------------- */
@@ -297,14 +300,23 @@ function openBoard(player) {
     if (text === '__FREE__') {
       cell.classList.add('free');
       cell.setAttribute('aria-pressed', 'true');
-      cell.disabled = true;
       const lights = document.createElement('span');
       lights.className = 'lights';
       lights.innerHTML = '<i></i><i></i><i></i>';
       const label = document.createElement('span');
-      label.textContent = 'RedLight GreenLight';
+      label.textContent = centerText(player);
       cell.appendChild(lights);
       cell.appendChild(label);
+      /* free either way, but green/white players can log the date */
+      if (isGreenWhite(player)) {
+        cell.classList.add('free-task');
+        cell.addEventListener('click', () => {
+          haptic();
+          if (player.contacts[12]) openUndo(12); else openCapture(12);
+        });
+      } else {
+        cell.disabled = true;
+      }
     } else {
       cell.textContent = text;
       cell.setAttribute('aria-pressed', player.marks.includes(i) ? 'true' : 'false');
@@ -315,9 +327,41 @@ function openBoard(player) {
 
   updateFooter();
   show('screen-board');
+  fitAllSquares();
 }
 
+/* ---- shrink a square's text until it fits its tile ---- */
+function fitSquare(cell) {
+  cell.style.fontSize = '';
+  let size = parseFloat(getComputedStyle(cell).fontSize);
+  let guard = 0;
+  while (cell.scrollHeight > cell.clientHeight + 1 && size > 5.5 && guard < 30) {
+    size -= 0.5;
+    cell.style.fontSize = size + 'px';
+    guard++;
+  }
+}
+
+function fitAllSquares() {
+  requestAnimationFrame(() => $$('.sq').forEach(fitSquare));
+}
+
+let fitTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(fitTimer);
+  fitTimer = setTimeout(fitAllSquares, 120);
+});
+
 let pendingSquare = null;
+
+function isGreenWhite(player) {
+  const s = STATUSES.find(x => x.id === player.status);
+  return !!s && s.lightGroup === 'greenwhite';
+}
+
+function squareText(i) {
+  return i === 12 ? centerText(current) : current.card[i];
+}
 
 function cellAt(i) { return $('.sq[data-i="' + i + '"]'); }
 
@@ -330,7 +374,7 @@ function onSquareTap(i, cell) {
 /* ---- capture: name + number or social ---- */
 function openCapture(i) {
   pendingSquare = i;
-  $('#cap-task').textContent = current.card[i];
+  $('#cap-task').textContent = squareText(i);
   $('#cap-name').value = '';
   $('#cap-phone').value = '';
   $('#cap-social').value = '';
@@ -366,10 +410,10 @@ $('#cap-save').addEventListener('click', () => {
     name: name,
     phone: phone ? normalizePhone(phone) : '',
     social: social,
-    task: current.card[i],
+    task: squareText(i),
     at: Date.now()
   };
-  if (!current.marks.includes(i)) current.marks.push(i);
+  if (i !== 12 && !current.marks.includes(i)) current.marks.push(i);
 
   const cell = cellAt(i);
   if (cell) cell.setAttribute('aria-pressed', 'true');
@@ -383,7 +427,7 @@ $('#cap-save').addEventListener('click', () => {
 function openUndo(i) {
   pendingSquare = i;
   const c = current.contacts[i];
-  $('#undo-task').textContent = current.card[i];
+  $('#undo-task').textContent = squareText(i);
   $('#undo-who').textContent = c ? c.name : 'Already checked off';
   $('#undo-contact').textContent = c ? contactLine(c) : '';
   $('#undo').hidden = false;
@@ -397,7 +441,7 @@ $('#undo-clear').addEventListener('click', () => {
   current.marks = current.marks.filter(x => x !== i);
   delete current.contacts[i];
   const cell = cellAt(i);
-  if (cell) cell.setAttribute('aria-pressed', 'false');
+  if (cell && i !== 12) cell.setAttribute('aria-pressed', 'false');
   Store.save(current);
   updateFooter();
   closeUndo();
