@@ -38,10 +38,10 @@ const POOL_UNIVERSAL = [
   'Same birth month',
   'Speaks 3+ languages',
   'Group selfie with 5+ new people',
-  'Hear a spicy food opinion',
+  'Share a spicy story or piece of tea',
   'Has a twin',
-  'Learn a dance move',
-  'Avoiding a deadline',
+  'Learn or teach a dance move',
+  'Staying in New Haven for Thanksgiving',
   'From your home state or country',
   'Phone battery under 10%',
   'Been to 15+ countries',
@@ -50,7 +50,8 @@ const POOL_UNIVERSAL = [
   'Wearing the same color',
   'Going to Harvard-Yale',
   'High-five 10 strangers',
-  'Toast with 3 programs'
+  'Toast with 3 programs',
+  'Share the last text you sent'
 ];
 
 /* ---- By status group ----
@@ -60,20 +61,18 @@ const POOL_UNIVERSAL = [
 const POOL_BY_GROUP = {
 
   single: [
-    'Get a single’s number',
     'Pickup line on a single',
     'A single’s worst date story',
     'Dance with a single',
     'Swap love languages with a single',
-    'Same pizza spot as a single',
-    'Staring contest with a single',
+    'Same favorite pizza spot as a single',
+    '30sec staring contest with a single',
     'Introduce two singles',
     'Compliment a single’s outfit',
     'Selfie with a single',
     'A single guesses your school',
     'Buy a single a drink',
-    'A single picks your drink',
-    'A single guesses your program'
+    'A single picks your drink'
   ],
 
   taken: [
@@ -82,20 +81,17 @@ const POOL_BY_GROUP = {
     'Wingman a single',
     'Set up two singles',
     'Dating advice to a single',
-    'Couple who met in grad school',
-    'Compare years with someone taken',
-    'Selfie to your partner'
+    'Find someone who has been together longer than you',
+    'Selfie with new friend to your partner'
   ],
 
   complicated: [
-    'Your situation in 3 words',
+    'Explain your situationship in 3 words',
     'Compare situationships',
     'Advice from someone taken',
     'Advice from a single',
     'Draft a “what are we” text',
-    'Situationship longer than yours',
-    'A stranger picks: single or taken?',
-    'Had the “what are we” talk',
+    'Find a situationship longer than yours',
     'A stranger judges your last text'
   ]
 };
@@ -115,3 +111,11 @@ const GROUP_SQUARES_PER_CARD = 12;
    My list are cleared, but their name, phone, program and status
    are kept, so nobody has to redo the questionnaire.            */
 const CARD_VERSION = 2;
+
+/* ---- Start a brand-new game (wipe everyone's data) ----
+   Change this and push. The next time any phone opens the site,
+   everything saved for the old game is deleted: profile, card,
+   marks and My list. Everyone starts over at the welcome screen.
+   Use this between events. Use CARD_VERSION above instead if you
+   only want new cards and people should keep their profiles.   */
+const GAME_ID = 'game-2';

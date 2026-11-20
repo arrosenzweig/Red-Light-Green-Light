@@ -21,7 +21,19 @@ const Store = {
   save(player)    { const a = this._all(); a[player.phone] = player; this._write(a); },
   setCurrent(p)   { try { localStorage.setItem(this.CUR, p); } catch (e) {} },
   getCurrent()    { try { return localStorage.getItem(this.CUR); } catch (e) { return null; } },
-  clearCurrent()  { try { localStorage.removeItem(this.CUR); } catch (e) {} }
+  clearCurrent()  { try { localStorage.removeItem(this.CUR); } catch (e) {} },
+
+  /* If this phone's data belongs to an older game, delete all of it. */
+  GAME: 'rlgl:game',
+  startGame(gameId) {
+    try {
+      if (localStorage.getItem(this.GAME) === gameId) return;
+      Object.keys(localStorage)
+        .filter(k => k.indexOf('rlgl:') === 0)
+        .forEach(k => localStorage.removeItem(k));
+      localStorage.setItem(this.GAME, gameId);
+    } catch (e) {}
+  }
 };
 
 /* ----------------------- helpers ------------------------ */
@@ -563,6 +575,7 @@ $('#btn-logout').addEventListener('click', () => {
 
 /* ------------------- resume on load --------------------- */
 (function boot() {
+  Store.startGame(GAME_ID);            // wipes this phone if the game was reset
   const phone = Store.getCurrent();
   if (!phone) return;
   const player = Store.get(phone);

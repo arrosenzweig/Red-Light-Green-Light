@@ -57,3 +57,9 @@ Then open http://localhost:4173
 Bump `CARD_VERSION` in `data.js` and push to both `main` and `gh-pages`. The next time each
 player opens the site (or recovers by phone number), they get a fresh card from the current
 squares. Marks and My list are cleared; name, phone, program and status are kept.
+
+## Starting a brand-new game (wipe everyone)
+
+Change `GAME_ID` in `data.js` (for example `'game-2'` to `'game-3'`) and push to both branches.
+The next time any phone opens the site, everything saved for the old game is deleted and the
+player starts at the welcome screen.
