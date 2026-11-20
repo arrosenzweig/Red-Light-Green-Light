@@ -105,6 +105,14 @@ const CENTER_SINGLE = 'Plan a date with a single';
    The rest of the 24 is filled from POOL_UNIVERSAL.             */
 const GROUP_SQUARES_PER_CARD = 12;
 
+/* Single players (Single / Open and Going with the flow): at least
+   this share of their 24 squares must come from the Single list.
+   0.5 = at least 12 single squares, plus the single centre square.
+   The Single list needs at least 24 x this many squares in it
+   (12 at 0.5) or the rule can't be met; to go above 50%, add more
+   squares to the Single list first.                              */
+const SINGLE_MIN_SHARE = 0.5;
+
 /* ---- Reset everyone's cards ----
    Bump this number and push. The next time each player opens the
    site, they get a fresh card from the current squares: marks and
@@ -118,4 +126,4 @@ const CARD_VERSION = 2;
    marks and My list. Everyone starts over at the welcome screen.
    Use this between events. Use CARD_VERSION above instead if you
    only want new cards and people should keep their profiles.   */
-const GAME_ID = 'game-2';
+const GAME_ID = 'game-3';

@@ -261,7 +261,18 @@ function buildCard(player) {
     });
   };
 
-  take(groupPool, GROUP_SQUARES_PER_CARD);   // their own group's squares
+  /* how many of their own group's squares go on first */
+  let own = GROUP_SQUARES_PER_CARD;
+  if (isSingle(player)) {
+    const minSingle = Math.ceil(24 * SINGLE_MIN_SHARE);
+    own = Math.max(own, minSingle);
+    if (groupPool.length < minSingle) {
+      console.warn('Single list has ' + groupPool.length + ' squares; ' +
+                   minSingle + ' are needed for SINGLE_MIN_SHARE.');
+    }
+  }
+
+  take(groupPool, own);                      // their own group's squares
   take(POOL_UNIVERSAL, 24);                  // fill up with the everyone pool
   take(groupPool, 24);                       // top up if the pools ran short
 
