@@ -22,9 +22,10 @@
       <p class="tagline">Yale Grad Mixer Bingo</p>
 
       <div class="actions">
-        <button class="btn btn-green" data-go="screen-new">I'm new here</button>
-        <button class="btn btn-ghost" data-go="screen-return">I'm coming back</button>
+        <button class="btn btn-green" data-go="screen-new">Starting the Game</button>
+        <button class="btn btn-ghost" data-go="screen-return">Returning to the Game</button>
       </div>
+      <p class="fine-print">“Returning” means you already started a card tonight, not that you’ve been to this party before.</p>
     </div>
   </section>
 
@@ -32,8 +33,8 @@
   <section class="screen" id="screen-return">
     <div class="stack">
       <button class="back" data-go="screen-welcome">← Back</button>
-      <h2 class="h2">Welcome back</h2>
-      <p class="sub">Enter the phone number you signed up with.</p>
+      <h2 class="h2">Returning to the Game</h2>
+      <p class="sub">Enter the phone number you used earlier tonight.</p>
 
       <label class="field">
         <span class="label">Phone number</span>
@@ -44,7 +45,7 @@
       <p class="error" id="return-error"></p>
 
       <button class="btn btn-green" id="btn-recover">Find my card</button>
-      <button class="btn btn-link" data-go="screen-new">Actually, I'm new →</button>
+      <button class="btn btn-link" data-go="screen-new">Starting the Game instead →</button>
     </div>
   </section>
 

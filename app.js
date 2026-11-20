@@ -212,7 +212,7 @@ $('#btn-recover').addEventListener('click', () => {
   }
   const player = Store.get(phone);
   if (!player) {
-    $('#return-error').textContent = 'No card found for that number on this phone. Tap "I’m new" to make one.';
+    $('#return-error').textContent = 'No card found for that number on this phone. Tap "Starting the Game instead" below to make one.';
     haptic(30); return;
   }
   Store.setCurrent(phone);

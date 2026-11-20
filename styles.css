@@ -220,3 +220,6 @@ input::placeholder{color:#5c5c70;}
 /* centre square when it carries the green/white date challenge */
 .sq.free-task{font-size:clamp(9px,2.7vw,12px);font-weight:700;letter-spacing:0;padding:3px 2px;}
 .sq.free-task .lights i{width:5px;height:5px;}
+
+/* small note under the welcome buttons */
+.fine-print{margin:6px 4px 0;font-size:12.5px;line-height:1.4;color:var(--muted);max-width:300px;}
