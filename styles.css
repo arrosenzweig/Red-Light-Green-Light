@@ -222,4 +222,4 @@ input::placeholder{color:#5c5c70;}
 .sq.free-task .lights i{width:5px;height:5px;}
 
 /* small note under the welcome buttons */
-.fine-print{margin:6px 4px 0;font-size:12.5px;line-height:1.4;color:var(--muted);max-width:300px;}
+.fine-print{margin:6px 4px 0;font-size:12.5px;line-height:1.4;color:var(--yellow);max-width:300px;}
