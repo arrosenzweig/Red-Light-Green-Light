@@ -126,4 +126,4 @@ const CARD_VERSION = 2;
    marks and My list. Everyone starts over at the welcome screen.
    Use this between events. Use CARD_VERSION above instead if you
    only want new cards and people should keep their profiles.   */
-const GAME_ID = 'game-3';
+const GAME_ID = 'game-4';

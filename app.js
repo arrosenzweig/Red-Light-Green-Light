@@ -57,23 +57,15 @@ function formatPhone(s) {
 
 function validPhone(s) { return normalizePhone(s).length === 10; }
 
-/* Deterministic RNG so the same phone always rebuilds the same card. */
-function seedFrom(str) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+/* True randomness for dealing cards. Every card is a fresh draw;
+   once dealt it is saved, so recovery shows the same card again. */
+function randomUnit() {
+  if (window.crypto && crypto.getRandomValues) {
+    const a = new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0] / 4294967296;
   }
-  return h >>> 0;
-}
-function rngFrom(seed) {
-  let s = seed || 1;
-  return function () {
-    s ^= s << 13; s >>>= 0;
-    s ^= s >> 17;
-    s ^= s << 5;  s >>>= 0;
-    return s / 4294967296;
-  };
+  return Math.random();
 }
 function shuffle(arr, rnd) {
   const a = arr.slice();
@@ -246,8 +238,7 @@ function groupOf(player) {
 }
 
 function buildCard(player) {
-  /* version in the seed so each reset reshuffles, even with the same squares */
-  const rnd = rngFrom(seedFrom(player.phone + '|' + player.status + '|v' + CARD_VERSION));
+  const rnd = randomUnit;
   const groupPool = (POOL_BY_GROUP[groupOf(player)] || []).slice();
 
   const picked = [];
