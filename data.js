@@ -108,3 +108,10 @@ const CENTER_SINGLE = 'Plan a date with a single';
 /* How many of the player's own group squares go on a card.
    The rest of the 24 is filled from POOL_UNIVERSAL.             */
 const GROUP_SQUARES_PER_CARD = 12;
+
+/* ---- Reset everyone's cards ----
+   Bump this number and push. The next time each player opens the
+   site, they get a fresh card from the current squares: marks and
+   My list are cleared, but their name, phone, program and status
+   are kept, so nobody has to redo the questionnaire.            */
+const CARD_VERSION = 2;

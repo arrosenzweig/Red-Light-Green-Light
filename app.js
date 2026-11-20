@@ -195,7 +195,7 @@ $('#btn-next').addEventListener('click', () => {
     contacts: {}
   };
   player.card  = buildCard(player);
-  player.marks = existing && existing.card ? [] : [];
+  player.cardVersion = CARD_VERSION;
   Store.save(player);
   Store.setCurrent(phone);
   openBoard(player);
@@ -234,7 +234,8 @@ function groupOf(player) {
 }
 
 function buildCard(player) {
-  const rnd = rngFrom(seedFrom(player.phone + '|' + player.status));
+  /* version in the seed so each reset reshuffles, even with the same squares */
+  const rnd = rngFrom(seedFrom(player.phone + '|' + player.status + '|v' + CARD_VERSION));
   const groupPool = (POOL_BY_GROUP[groupOf(player)] || []).slice();
 
   const picked = [];
@@ -271,6 +272,15 @@ let current = null;
 function openBoard(player) {
   current = player;
   if (!player.contacts) player.contacts = {};
+
+  /* Card made before the last reset: deal a fresh one. */
+  if (player.cardVersion !== CARD_VERSION) {
+    player.card = buildCard(player);
+    player.marks = [];
+    player.contacts = {};
+    player.cardVersion = CARD_VERSION;
+    Store.save(player);
+  }
 
   const statusDef  = STATUSES.find(s => s.id === player.status);
   const programDef = PROGRAMS.find(p => p.id === player.program);

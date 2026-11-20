@@ -51,3 +51,9 @@ python -m http.server 4173
 ```
 
 Then open http://localhost:4173
+
+## Resetting everyone's cards
+
+Bump `CARD_VERSION` in `data.js` and push to both `main` and `gh-pages`. The next time each
+player opens the site (or recovers by phone number), they get a fresh card from the current
+squares. Marks and My list are cleared; name, phone, program and status are kept.
