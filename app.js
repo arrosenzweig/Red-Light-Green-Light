@@ -83,6 +83,7 @@ function show(id) {
 $$('[data-go]').forEach(b => b.addEventListener('click', () => {
   $('#quiz-error').textContent = '';
   $('#return-error').textContent = '';
+  if (b.dataset.go === 'screen-new') resetQuiz();   // every new player starts blank
   show(b.dataset.go);
 }));
 
@@ -128,9 +129,9 @@ function renderChoices(container, options, onPick) {
 }
 
 /* --------------------- quiz state ----------------------- */
-const draft = { name: '', phone: '', program: '', status: '', gender: '', seeking: '' };
+const draft = { name: '', phone: '', program: '', status: '' };
 let step = 0;
-const LAST_STEP = 3;
+const LAST_STEP = 2;
 
 renderChoices($('#q-program'), PROGRAMS, id => { draft.program = id; });
 renderChoices($('#q-status'),  STATUSES, id => {
@@ -138,8 +139,18 @@ renderChoices($('#q-status'),  STATUSES, id => {
   const s = STATUSES.find(x => x.id === id);
   document.documentElement.style.setProperty('--accent', s.color);
 });
-renderChoices($('#q-gender'),  GENDERS, id => { draft.gender = id; });
-renderChoices($('#q-seeking'), SEEKING, id => { draft.seeking = id; });
+
+/* Wipe every answer so a shared phone never carries the last
+   person's name, number, or picks into the next questionnaire. */
+function resetQuiz() {
+  draft.name = draft.phone = draft.program = draft.status = '';
+  step = 0;
+  $('#q-name').value = '';
+  $('#q-phone').value = '';
+  $$('#quiz .choice').forEach(c => c.setAttribute('aria-pressed', 'false'));
+  document.documentElement.style.removeProperty('--accent');
+  paintStep();
+}
 
 function paintStep() {
   $$('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === step));
@@ -159,10 +170,6 @@ function validateStep() {
   }
   if (step === 1 && !draft.program) return 'Pick a program to continue.';
   if (step === 2 && !draft.status)  return 'Pick one — it changes your squares.';
-  if (step === 3) {
-    if (!draft.gender)  return 'Pick one for "I am…".';
-    if (!draft.seeking) return 'Pick who you want to meet.';
-  }
   return '';
 }
 
@@ -182,8 +189,6 @@ $('#btn-next').addEventListener('click', () => {
     name: draft.name,
     program: draft.program,
     status: draft.status,
-    gender: draft.gender,
-    seeking: draft.seeking,
     createdAt: existing ? existing.createdAt : Date.now(),
     card: null,
     marks: [],
@@ -219,42 +224,33 @@ $('#return-phone').addEventListener('keydown', e => {
 });
 
 /* ------------------- card generation -------------------- */
-function lightWord(player) {
-  const base = 'green/white light';
-  const statusDef = STATUSES.find(s => s.id === player.status);
-  /* only personalise for the people actually looking */
-  if (!statusDef || statusDef.lightGroup !== 'greenwhite') return base;
-  if (player.seeking === 'men')   return 'green/white guy';
-  if (player.seeking === 'women') return 'green/white girl';
-  return base;
+function fill(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function fill(text, player) {
-  const out = text.replace(/\{GW\}/g, lightWord(player));
-  return out.charAt(0).toUpperCase() + out.slice(1);
+function groupOf(player) {
+  const s = STATUSES.find(x => x.id === player.status);
+  return s ? s.group : '';
 }
 
 function buildCard(player) {
   const rnd = rngFrom(seedFrom(player.phone + '|' + player.status));
-  const statusDef = STATUSES.find(s => s.id === player.status);
-  const group = statusDef.lightGroup;
-
-  const lightPool = (POOL_BY_LIGHT[group] || []).slice();
+  const groupPool = (POOL_BY_GROUP[groupOf(player)] || []).slice();
 
   const picked = [];
   const seen = new Set();
   const take = (pool, n) => {
     shuffle(pool, rnd).forEach(line => {
       if (picked.length >= 24 || n <= 0) return;
-      const txt = fill(line, player);
+      const txt = fill(line);
       if (seen.has(txt)) return;
       seen.add(txt); picked.push(txt); n--;
     });
   };
 
-  take(lightPool, LIGHT_SQUARES_PER_CARD);   // their own light's squares
+  take(groupPool, GROUP_SQUARES_PER_CARD);   // their own group's squares
   take(POOL_UNIVERSAL, 24);                  // fill up with the everyone pool
-  take(lightPool, 24);                       // top up if the pools ran short
+  take(groupPool, 24);                       // top up if the pools ran short
 
   while (picked.length < 24) picked.push('Meet someone new and get their name');
 
@@ -263,14 +259,10 @@ function buildCard(player) {
   return squares;
 }
 
-/* The centre square's wording: green/white players get the date
+/* The centre square's wording: single players get the date
    challenge, everyone else gets the plain free space.            */
 function centerText(player) {
-  const statusDef = STATUSES.find(s => s.id === player.status);
-  if (statusDef && statusDef.lightGroup === 'greenwhite') {
-    return fill(CENTER_GREENWHITE, player);
-  }
-  return 'RedLight GreenLight';
+  return isSingle(player) ? fill(CENTER_SINGLE) : 'RedLight GreenLight';
 }
 
 /* ----------------------- board -------------------------- */
@@ -307,8 +299,8 @@ function openBoard(player) {
       label.textContent = centerText(player);
       cell.appendChild(lights);
       cell.appendChild(label);
-      /* free either way, but green/white players can log the date */
-      if (isGreenWhite(player)) {
+      /* free either way, but single players can log the date */
+      if (isSingle(player)) {
         cell.classList.add('free-task');
         cell.addEventListener('click', () => {
           haptic();
@@ -335,7 +327,10 @@ function fitSquare(cell) {
   cell.style.fontSize = '';
   let size = parseFloat(getComputedStyle(cell).fontSize);
   let guard = 0;
-  while (cell.scrollHeight > cell.clientHeight + 1 && size > 5.5 && guard < 30) {
+  const overflows = () =>
+    cell.scrollHeight > cell.clientHeight + 1 ||   // too many lines
+    cell.scrollWidth  > cell.clientWidth  + 1;     // one word too wide
+  while (overflows() && size > 5.5 && guard < 30) {
     size -= 0.5;
     cell.style.fontSize = size + 'px';
     guard++;
@@ -343,8 +338,16 @@ function fitSquare(cell) {
 }
 
 function fitAllSquares() {
-  requestAnimationFrame(() => $$('.sq').forEach(fitSquare));
+  const run = () => $$('.sq').forEach(fitSquare);
+  run();                                   // now, so nothing ever paints clipped
+  setTimeout(run, 80);                     // again once layout has settled
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(run);
 }
+
+/* re-fit when someone switches back to the tab */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && current) fitAllSquares();
+});
 
 let fitTimer = null;
 window.addEventListener('resize', () => {
@@ -354,9 +357,8 @@ window.addEventListener('resize', () => {
 
 let pendingSquare = null;
 
-function isGreenWhite(player) {
-  const s = STATUSES.find(x => x.id === player.status);
-  return !!s && s.lightGroup === 'greenwhite';
+function isSingle(player) {
+  return groupOf(player) === 'single';
 }
 
 function squareText(i) {
@@ -543,6 +545,8 @@ $('#btn-reset').addEventListener('click', () => {
 $('#btn-logout').addEventListener('click', () => {
   Store.clearCurrent();
   current = null;
+  $('#return-phone').value = '';
+  resetQuiz();
   $('#sheet').hidden = true;
   show('screen-welcome');
 });
